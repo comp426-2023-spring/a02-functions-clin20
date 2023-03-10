@@ -1,8 +1,10 @@
 #!/usr/bin/env node
-const fs = require("fs");
 
-const moment = require("moment-timezone")
-const timezone = moment.tz.guess()
+import moment from "moment-timezone";
+import minimist from "minimist";
+import fetch from "node-fetch";
+
+//parse args
 const args = minimist(process.argv.slice()); 
 
 let lat;
@@ -12,7 +14,7 @@ let tz;
 
 
 if("h" in args) {
-	//Show this help message and exit
+	//show this help message and exit
 	fs.readFile('./helpFile.txt', 'utf8', (err, data) => {
 		if (err) {
 			console.error(err);
@@ -43,18 +45,45 @@ if ("e" in args) {
     process.exit(0);
 }
 
-if (args[i] == "-z") {
-	//Time zone: uses tz.guess() from moment-timezone by default.
-	ti = i + 1;
+//time zone
+if ("t" in args) {
+    tz = args.t;
+} else {
+    tz = moment.tz.guess();
 }
 
-if (args[i] == "-d") {
-	//Day to retrieve weather: 0 is today; defaults to 1.
-	day = i + 1;
+//handle request
+const fetch_url = "https://api.open-meteo.com/v1/forecast?latitude=" + lat + "&longitude=" + long + "&timezone=" + tz + "&current_weather=true&daily=precipitation_hours";
+const response = await fetch(fetch_url);
+const data = await response.json();
+
+if("j" in args) {
+    console.log(data);
+    process.exit(0);
 }
 
-if (args[i] == "-j") {
-	//Echo pretty JSON from open-meteo API and exit.
+if ("d" in args) {
+    day = args.d 
+} else {
+    day = 1;
 }
 
-const response = fetch('https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + long + '&daily=precipitation_hours&timezone=' + tz);
+if (day == 0) {
+    if (data.daily.precipitation_hours[day] > 0) {
+        console.log("you should probably wear galoshes today.");
+    } else {
+        console.log("you don't have to wear galoshes today.");
+    }
+} else if (day > 1) {
+   if (data.daily.precipitation_hours[day] > 0) {
+        console.log("you should probably wear galoshes in" + day + "days.");
+    } else {
+       console.log("you don't have to wear galoshes in" + day + "days.");
+    }
+} else {
+   if (data.daily.precipitation_hours[1] > 0) {
+        console.log("you should probably wear galoshes tomorrow.");
+    } else {
+       console.log("you don't have to wear galoshes tomorrow.");
+    }
+}
