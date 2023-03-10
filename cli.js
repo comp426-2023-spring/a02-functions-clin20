@@ -31,7 +31,7 @@ if (args.n) {
 } else if (args.s) {
     lat = args.s * -1;
 } else {
-    console.log("Latitude of range");
+    console.log("Latitude must be in range");
     process.exit(0);
 }
 
@@ -41,7 +41,7 @@ if ("e" in args) {
 } else if ("w" in args) {
     long = args["w"] * -1;
 } else {
-    console.log("Longitude out of range");
+    console.log("Longitude must be in range");
     process.exit(0);
 }
 
