@@ -3,6 +3,7 @@
 import moment from "moment-timezone";
 import minimist from "minimist";
 import fetch from "node-fetch";
+const fs = require("fs");
 
 //parse args
 const args = minimist(process.argv.slice()); 
